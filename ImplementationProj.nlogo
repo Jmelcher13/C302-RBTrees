@@ -53,6 +53,15 @@ to initialize-nodes
   ]
 end
 
+to makeNode
+  ifelse red? [set color red]
+    [set color black]
+  set shape "circle"
+  set size 2
+  set label element
+end
+
+;;;; ZALE SECTION ;;;;;;;
 to insert
   let r? true
   if [is-null?] of root = true
@@ -141,14 +150,6 @@ to insert
 end
 
 
-to makeNode
-  ifelse red? [set color red]
-    [set color black]
-  set shape "circle"
-  set size 2
-  set label element
-end
-
 to case1
   ask parent [set red? false
   set color black]
@@ -164,6 +165,27 @@ end
 to case2
 
 end
+
+;;;;; END ZALES SECTION ;;;;;;;;;;;;;;;
+
+
+;;;;;START JENNYS SECTION ;;;;;;;;;;
+
+
+
+;;;;;; END JENNY SECTION ;;;;;;;;;;;;;;;;
+
+
+
+;;;;;;START TRICIAS SECTION ;;;;;;;;;;;;;;;
+
+
+
+
+
+
+
+;;;;;;;; END TRICIA SECTION ;;;;;;;;;;;;;
 @#$#@#$#@
 GRAPHICS-WINDOW
 210

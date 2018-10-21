@@ -53,6 +53,15 @@ to initialize-nodes
   ]
 end
 
+to makeNode
+  ifelse red? [set color red]
+    [set color black]
+  set shape "circle"
+  set size 2
+  set label element
+end
+
+;;;; ZALE SECTION ;;;;;;;
 to insert
   let r? true
   if [is-null?] of root = true
@@ -126,29 +135,20 @@ to insert
 
   ]
 
-  if [is-root?] of thisnode = false[
-    while [[red?] of [parent] of thisnode = true ]
-    [
-      ask thisnode [
-        ifelse [red?] of [sibling] of parent = true
-        [ case1 ]
-        [case2]
-      ]
-      set thisnode [parent] of [parent] of thisnode
+  while [[is-root?] of thisnode = false and [red?] of [parent] of thisnode = true]
+  [
+    ask thisnode [
+      ifelse [red?] of [sibling] of parent = true
+      [ case1 ]
+      [case2]
     ]
-    ;if [red?] aunt = false and
+    set thisnode [parent] of [parent] of thisnode
   ]
+  ;if [red?] aunt = false and
+
   ;layout-radial nodes links (root)
 end
 
-
-to makeNode
-  ifelse red? [set color red]
-    [set color black]
-  set shape "circle"
-  set size 2
-  set label element
-end
 
 to case1
   ask parent [set red? false
@@ -165,6 +165,19 @@ end
 to case2
 
 end
+
+;;;;; END ZALES SECTION ;;;;;;;;;;;;;;;
+
+
+;;;;;START JENNYS SECTION ;;;;;;;;;;
+
+
+
+;;;;;; END ;;;;;;;;;;;;;;;;
+
+
+
+;;;;;;
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -216,7 +229,7 @@ INPUTBOX
 89
 130
 element
-3.0
+1.0
 1
 0
 Number
