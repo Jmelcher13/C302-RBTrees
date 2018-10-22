@@ -139,7 +139,7 @@ to insert
   [
     ask thisnode [
       ifelse [red?] of [sibling] of parent = true
-      [ case1 ]
+      [case1]
       [case2]
     ]
     set thisnode [parent] of [parent] of thisnode
@@ -163,9 +163,122 @@ to case1
 end
 
 to case2
+  let A self
+  let B parent
+  let C [parent] of parent
+
+  let p [parent] of [parent] of parent
+  let s [sibling] of parent
+
+  let rooted? false
+  if [is-root?] of C = true [set rooted? true]
+
+  let miniv [value] of A
+  let mini A
+  if [value] of C < miniv [
+    set mini C
+    set miniv [value] of C
+  ]
+  if [value] of B < miniv [set mini B]
+
+  let maxiv [value] of C
+  let maxi C
+  if [value] of A > maxiv [
+    set maxi A
+    set maxiv [value] of A
+  ]
+  if [value] of B > maxiv [set maxi B]
+
+  let midv [value] of B
+  let mid B
+  ifelse [value] of A != maxiv and [value] of A != miniv
+  [set mid A]
+  [
+    ifelse [value] of C != maxiv and [value] of C != miniv
+    [set mid C]
+    [set mid B]
+  ]
+
+
+  print [value] of mini
+
+  print [value] of mid
+
+  print [value] of maxi
+
+
+  let alpha [lChild] of mini
+
+  let beta [lChild] of mid
+  if [lChild] of mid = mini
+  [set beta [rChild] of mini]
+
+  let gamma [rChild] of mid
+  if [rChild] of mid = maxi
+  [set gamma [lChild] of maxi]
+
+  let delta [rChild] of maxi
+
+  ask alpha[
+    set parent mini
+    set sibling beta
+  ]
+
+  ask mini[
+    set parent mid
+    set lChild alpha
+    set rChild beta
+    set color red
+    set red? true
+    set is-root? false
+    set sibling maxi
+  ]
+
+  ask beta[
+    set parent mini
+    set sibling alpha
+  ]
+
+  ask mid[
+    set parent p
+    set sibling s
+    set lChild mini
+    set rChild maxi
+    set color black
+    set red? false
+    if rooted? = true [set is-root? true]
+  ]
+
+  ask gamma[
+    set parent maxi
+    set sibling delta
+  ]
+
+  ask maxi[
+    set lChild gamma
+    set parent mid
+    set rChild delta
+    set color red
+    set red? true
+    set is-root? false
+    set sibling mini
+  ]
+
+  ask delta[
+    set parent maxi
+    set sibling gamma
+  ]
+
+;  print [value] of alpha
+;  print [value] of mini
+;  print [value] of beta
+;  print [value] of mid
+;  print [value] of gamma
+;  print [value] of maxi
+;  print [value] of delta
+
 
 end
-
 ;;;;; END ZALES SECTION ;;;;;;;;;;;;;;;
 
 
@@ -237,7 +350,7 @@ INPUTBOX
 89
 130
 element
-1.0
+3.0
 1
 0
 Number
