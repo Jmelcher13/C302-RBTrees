@@ -146,9 +146,6 @@ to insert
   ]
 
   redrawRedBlack
-  ;if [red?] aunt = false and
-
-  ;layout-radial nodes links (root)
 end
 
 
@@ -203,12 +200,11 @@ to case2
 
   let midv [value] of B
   let mid B
-  ifelse [value] of A != maxiv and [value] of A != miniv
+  ifelse A != maxi and A != mini
   [set mid A]
   [
-    ifelse [value] of C != maxiv and [value] of C != miniv
+    if C != maxi and C != mini
     [set mid C]
-    [set mid B]
   ]
 
   let alpha [lChild] of mini
@@ -287,15 +283,6 @@ to case2
     set parent maxi
     set sibling gamma
   ]
-
-;  print [value] of alpha
-;  print [value] of mini
-;  print [value] of beta
-;  print [value] of mid
-;  print [value] of gamma
-;  print [value] of maxi
-;  print [value] of delta
-
 end
 
 to redrawRedBlack
@@ -312,10 +299,9 @@ to redrawRedBlack
 
   while [empty? mylist = false][
 
-    print mylist
-
     set cur first mylist
     set mylist remove-item 0 mylist
+
 
     ask cur[
       set depth [depth] of parent + 1
@@ -449,7 +435,7 @@ INPUTBOX
 89
 130
 element
-0.0
+5.5
 1
 0
 Number
