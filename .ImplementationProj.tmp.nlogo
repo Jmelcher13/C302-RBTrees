@@ -170,14 +170,65 @@ end
 
 
 ;;;;;START JENNYS SECTION ;;;;;;;;;;
+to two34Tree
+  if rb? = true [
+  ; if a node is black - it and it's RED children turn to a node.
+  ask nodes [if red? = false
+    [
+    set shape "square"]
+    if lChild != 0 and [red?] of lChild = true
+    [ask lChild [set shape "square"
+      move-to parent
+      set heading 270
+      fd 1]] ;make it part of its parent's node
+    if rChild != 0 and [red?] of rChild = true
+    [ask rChild [set shape "square"
+      move-to parent
+      set heading 90
+      fd 1]] ; make it part of its parent's node
+  ]
+  ]
+  set rb?  false
+end
+
+to RBTree
+  ifelse rb? = false [
+  ask nodes [ if red? = false [set shape "circle"]
+    if red? = true
+    [ set shape "circle"]
+    if lChild != 0 and [red?] of lChild = true
+    [ask lChild
+      [set shape "circle"
+        set heading 180 + (45 / (height ^ 0.5))
+        fd 10 / height ^ 0.5]]
+    if rChild != 0 and [red?] of rChild = true
+    [ ask rChild [
+      set shape "circle"
+       set heading 180 - (45 / (height ^ 0.5))
+      fd 10 / height ^ 0.5
+      ]
+  ]]
+  set rb? true
+  ]
+ [ write "already a red-black tree"
+end
 
 
 
-;;;;;; END ;;;;;;;;;;;;;;;;
+
+;;;;;; END JENNY SECTION ;;;;;;;;;;;;;;;;
 
 
 
-;;;;;;
+;;;;;;START TRICIAS SECTION ;;;;;;;;;;;;;;;
+
+
+
+
+
+
+
+;;;;;;;; END TRICIA SECTION ;;;;;;;;;;;;;
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -229,7 +280,7 @@ INPUTBOX
 89
 130
 element
-1.0
+17.0
 1
 0
 Number
@@ -241,6 +292,40 @@ BUTTON
 119
 NIL
 insert
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+111
+153
+198
+186
+234 Tree
+two34Tree
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+58
+209
+182
+242
+Red-Black Tree
+RBTree
 NIL
 1
 T
