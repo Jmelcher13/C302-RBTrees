@@ -21,6 +21,7 @@ nodes-own[
   height
   is-root?
   sibling
+  depth
 ]
 
 boxes-own[
@@ -109,7 +110,6 @@ to insert
       set bDepth 0
       set is-root? false
       set height [height] of parent + 1
-      create-link-with parent
       set heading 180 + (45 / (height ^ 0.5))
       fd 10 / height ^ 0.5
     ]
@@ -123,7 +123,6 @@ to insert
       set parent thisnode
       set bDepth 0
       set is-root? false
-      create-link-with parent
       set height [height] of parent + 1
       set heading 180 - (45 / (height ^ 0.5))
       fd 10 / height ^ 0.5
@@ -135,15 +134,18 @@ to insert
 
   ]
 
-  while [[is-root?] of thisnode = false and [red?] of [parent] of thisnode = true]
+  while [[is-root?] of thisnode = false and [red?] of thisnode = true and [red?] of [parent] of thisnode = true]
   [
+    let next [parent] of [parent] of thisnode
     ask thisnode [
       ifelse [red?] of [sibling] of parent = true
       [case1]
       [case2]
     ]
-    set thisnode [parent] of [parent] of thisnode
+    set thisnode next
   ]
+
+  redrawRedBlack
   ;if [red?] aunt = false and
 
   ;layout-radial nodes links (root)
@@ -167,11 +169,21 @@ to case2
   let B parent
   let C [parent] of parent
 
-  let p [parent] of [parent] of parent
-  let s [sibling] of parent
+
+  let p 0
+  let s 0
+  let lc? false
 
   let rooted? false
-  if [is-root?] of C = true [set rooted? true]
+  ifelse [is-root?] of C = true
+  [set rooted? true]
+  [
+    set p [parent] of [parent] of parent
+    set s [sibling] of [parent] of parent
+
+    set lc? false
+    if C = [lChild] of p [ set lc? true ]
+  ]
 
   let miniv [value] of A
   let mini A
@@ -198,14 +210,6 @@ to case2
     [set mid C]
     [set mid B]
   ]
-
-
-  print [value] of mini
-
-  print [value] of mid
-
-  print [value] of maxi
-
 
   let alpha [lChild] of mini
 
@@ -240,14 +244,29 @@ to case2
   ]
 
   ask mid[
-    set parent p
     set sibling s
     set lChild mini
     set rChild maxi
     set color black
     set red? false
-    if rooted? = true [set is-root? true]
+    ifelse rooted? = true
+    [set is-root? true]
+    [
+      set parent p
+      ifelse lc? = true
+      [
+        ask parent[
+          set lChild myself
+        ]
+      ]
+      [
+        ask parent[
+          set rChild myself
+        ]
+      ]
+    ]
   ]
+  if rooted? = true [set root mid]
 
   ask gamma[
     set parent maxi
@@ -277,6 +296,43 @@ to case2
 ;  print [value] of maxi
 ;  print [value] of delta
 
+end
+
+to redrawRedBlack
+  clear-links
+
+  ask root[
+    setxy 0 15
+    set depth 0
+  ]
+  let myList []
+  set mylist lput [lChild] of root mylist
+  set mylist lput [rChild] of root mylist
+  let cur root
+
+  while [empty? mylist = false][
+
+    print mylist
+
+    set cur first mylist
+    set mylist remove-item 0 mylist
+
+    ask cur[
+      set depth [depth] of parent + 1
+      move-to parent
+      ifelse self = [lChild] of parent
+      [ set heading 180 + (45 / (depth ^ 0.5)) ]
+      [ set heading 180 - (45 / (depth ^ 0.5)) ]
+
+      fd 10 / depth ^ 0.5
+
+      if is-null? = false [
+        set mylist lput lChild mylist
+        set mylist lput rChild mylist
+        create-link-with parent
+      ]
+    ]
+  ]
 
 end
 ;;;;; END ZALES SECTION ;;;;;;;;;;;;;;;
@@ -393,7 +449,7 @@ INPUTBOX
 89
 130
 element
-67.0
+0.0
 1
 0
 Number
