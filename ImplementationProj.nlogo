@@ -7,7 +7,7 @@ breed [boxes box]
 globals[
 rb?
 root
-
+prev234
 ]
 
 nodes-own[
@@ -38,6 +38,7 @@ end
 
 to initialize-globals
   set rb? true
+  set prev234 false
 end
 
 to initialize-nodes
@@ -64,6 +65,11 @@ end
 
 ;;;; ZALE SECTION ;;;;;;;
 to insert
+  ifelse rb? = false  ;
+  [set prev234 true ; remember that the user inserted into a 234 tree
+  RBTree] ; if the user is inserting into a 234 tree, switch to RB then switch back after
+  [set prev234 false]
+
   let r? true
   if [is-null?] of root = true
   [ set r? false ]
@@ -146,6 +152,10 @@ to insert
   ]
 
   redrawRedBlack
+
+  if prev234 = true [ ;if the user was inserting into a 234 tree, switch back to that.
+    two34Tree
+  ]
 end
 
 
@@ -324,46 +334,49 @@ end
 ;;;;; END ZALES SECTION ;;;;;;;;;;;;;;;
 
 
-;;;;;START JENNYS SECTION ;;;;;;;;;;
-to two34Tree
+
+to two34Tree ;;;;;;;;;;; BUTTON SWITCHES FROM R/B TO 234 TREES;;;;;;;;;;;;;;;;;;;;;;;;;;
+
   ifelse rb? = true [
-  ; if a node is black - it and it's RED children turn to a node.
-  ask nodes [if red? = false
+  ask nodes [if red? = false ; if a node is black make it the center of a 234 tree node
     [
-    set shape "square"]
-    if lChild != 0 and [red?] of lChild = true
-    [ask lChild [set shape "square"
-      move-to parent
-      set heading 270
-      fd 1]] ;make it part of its parent's node
+    set shape "square"  ; change shape
+        if is-root? = false and [red?] of parent = true [
+          set depth [depth] of parent
+      ]
+        if depth <= 3 and depth > 0 ; if a parent moves up, it shouldn't leave a gap, the
+        [set ycor 16 - (depth * 3)] ; child should also move up.
+        if depth > 3                ; maintain equal levels by using depth
+        [set ycor 0 - (depth * 3)]
+      ]
+    if lChild != 0 and [red?] of lChild = true ; if it has red children, bring them up to be part of the 234 tree node
+    [ask lChild [set shape "square" ;left child
+      move-to parent ; bring it up
+      set heading 270 ; put children to the side of the parent
+      fd 1]]
     if rChild != 0 and [red?] of rChild = true
-    [ask rChild [set shape "square"
-      move-to parent
-      set heading 90
-      fd 1]] ; make it part of its parent's node
+    [ask rChild [set shape "square" ; right child
+      move-to parent ;bring up
+      set heading 90 ; put it on right side of parent
+      fd 1]]
   ]
- set rb?  false ]
-    [ write "already a 2-3-4 tree"]
+ set rb?  false ] ; rb? is false because this is a rb tree, so red-black button will work
+    [ write "already a 2-3-4 tree"] ; if rb? is false, this is already a 234 tree, print that out.
 end
 
-to RBTree
-  ifelse rb? = false [
-  ask nodes [ if red? = false [set shape "circle"]
-    if red? = true
-    [ set shape "circle"]
-    if lChild != 0 and [red?] of lChild = true
-    [ask lChild
-      [set shape "circle"
-        set heading 180 + (45 / (height ^ 0.5))
-        fd 10 / height ^ 0.5]]
-    if rChild != 0 and [red?] of rChild = true
-    [ ask rChild [
-      set shape "circle"
-       set heading 180 - (45 / (height ^ 0.5))
-      fd 10 / height ^ 0.5
+to RBTree  ;;;;;;;;BUTTON SWITCHES FROM 234 TO RB TREES;;;;;;;;;;;;;;;;;;;;;
+
+  ifelse rb? = false [ ; can only be changed to rb tree if rb? is false (thus, it is already a 234 tree)
+    ask nodes [ if red? = false ;;;; black nodes
+      [set shape "circle" ; Shape of nodes back to circles
+        if is-root? = false and [red?] of parent = true [
+          set depth depth + 1 ] ; depth decreased when they were switched to a 234 tree, add it back
       ]
-  ]]
-  set rb? true
+      if red? = true  ;;;;;red nodes
+      [ set shape "circle"] ; change shapes back to circles
+    ]
+    redrawRedBlack  ; use redrawredblack function to actually redraw the tree
+    set rb? true ;global variable to know it is a red/black tree
   ]
   [ write "already a red-black tree"]
 end
@@ -371,7 +384,7 @@ end
 
 
 
-;;;;;; END JENNY SECTION ;;;;;;;;;;;;;;;;
+
 
 
 
@@ -435,7 +448,7 @@ INPUTBOX
 89
 130
 element
-5.5
+13.0
 1
 0
 Number
