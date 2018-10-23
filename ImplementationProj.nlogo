@@ -7,22 +7,22 @@ breed [nodes node]
 
 
 globals[
-rb?
-root
-prev234
+rb?      ; is the tree a Red-Black tree?
+root     ; is this the root?
+prev234  ; was the tree previously a 234 tree
 ]
 
 nodes-own[
-  lChild
-  rChild
+  lChild   ; left child
+  rChild   ; right child
   parent
-  red?
+  red?     ; is the node red
   value
-  bDepth
-  is-null?
+  bDepth   ; black depth of this node
+  is-null? ; is the node null?
   height
-  is-root?
-  sibling
+  is-root? ; is this node the root
+  sibling  ; what is the sibling of this node
   depth
 ]
 
@@ -30,18 +30,18 @@ to setup
   ca
   initialize-globals
   initialize-nodes
-  set-default-shape nodes "circle"
+  set-default-shape nodes "circle"  ;basic graphics
   ask patches [set pcolor white]
   reset-ticks
 end
 
 to initialize-globals
-  set rb? true
+  set rb? true      ;always start with a red-black tree
   set prev234 false
 end
 
 to initialize-nodes
-  create-nodes 1 [
+  create-nodes 1 [  ; initializing a blank (invisible) node as root
     set is-null? true
     set red? false
     set bDepth 0
@@ -54,37 +54,37 @@ to initialize-nodes
   ]
 end
 
-to makeNode
-  ifelse red? [set color red]
+to makeNode                  ; basics of a node
+  ifelse red? [set color red]; color
     [set color black]
-  set shape "circle"
-  set size 2
-  set label element
+  set shape "circle"         ; shape
+  set size 2                 ; size
+  set label element          ; label
 end
 
 ;;;; ZALE SECTION ;;;;;;;
 to insert
-  ifelse rb? = false  ;
-  [set prev234 true ; remember that the user inserted into a 234 tree
-  RBTree] ; if the user is inserting into a 234 tree, switch to RB then switch back after
+  ifelse rb? = false  ; if the user is inserting into a 234 tree, switch to RB then switch back after
+  [set prev234 true   ; remember that the user inserted into a 234 tree
+  RBTree]             ;
   [set prev234 false]
 
-  let r? true
-  if [is-null?] of root = true
+  let r? true                  ; the only case in which insertion would not be red
+  if [is-null?] of root = true ; is if it were the root
   [ set r? false ]
 
   let thisnode root
   let prev thisnode
-  while [[is-null?] of thisnode = false]
-  [
+  while [[is-null?] of thisnode = false]   ; while you are not at a leaf, keep comparing
+  [                                        ; element to nodes and moving down
     set prev thisnode
-    ifelse element <= [value] of thisnode
-    [ set thisnode [lChild] of thisnode]
-    [ set thisnode [rChild] of thisnode]
+    ifelse element <= [value] of thisnode  ;if new element is < value of node
+    [ set thisnode [lChild] of thisnode]   ; move left of this node
+    [ set thisnode [rChild] of thisnode]   ; if it is >, move right of this node
   ]
 
   ask thisnode [
-    set height height + 1
+    set height height + 1                  ; increase height and black depth (if it is black)
     if r? = false[set bDepth bDepth + 1]
   ]
 
@@ -97,17 +97,15 @@ to insert
     set value element
     set label value
     set is-null? false
-;    ask nodes[if is-null? = false[
-;      set label-color lime]]
     set red? r?
     set bDepth 1
 
     if is-root? = false
     [
-      create-link-with parent
+      create-link-with parent           ; draw line between child and its parent
       set parent prev
     ]
-    hatch 1 [
+    hatch 1 [                           ; hatch left leaf
       set l self
       set color white
       set size 0
@@ -120,7 +118,7 @@ to insert
       set heading 180 + (45 / (height ^ 0.5))
       fd 10 / height ^ 0.5
     ]
-    hatch 1 [
+    hatch 1 [                           ; hatch right leaf
       set sibling l
       set r self
       set color white
@@ -134,25 +132,28 @@ to insert
       set heading 180 - (45 / (height ^ 0.5))
       fd 10 / height ^ 0.5
     ]
-    ask l [set sibling r]
+    ask l [set sibling r]              ; associate siblings
     set lChild l
     set rChild r
     if red? = true [set color red]
 
   ]
-
-  while [[is-root?] of thisnode = false and [red?] of thisnode = true and [red?] of [parent] of thisnode = true]
+;;;;;;;; Restructuring cases ;;;;;;;;;;;
+  while [
+    [is-root?] of thisnode = false
+    and [red?] of thisnode = true
+    and [red?] of [parent] of thisnode = true] ; in the case where a child has a red parent
   [
     let next [parent] of [parent] of thisnode
     ask thisnode [
       ifelse [red?] of [sibling] of parent = true
-      [case1]
-      [case2]
+      [case1]  ; if there is also a red aunt
+      [case2]  ; if there is not a red aunt
     ]
     set thisnode next
   ]
 
-  redrawRedBlack
+  redrawRedBlack      ; redraw the tree
 
   if prev234 = true [ ;if the user was inserting into a 234 tree, switch back to that.
     two34Tree
@@ -160,7 +161,7 @@ to insert
 end
 
 
-to case1
+to case1     ; the case in which a node, its parent and its aunt were both red
   ask parent [set red? false
     set color black]
   if [is-root?] of [parent] of parent = false[
@@ -168,14 +169,14 @@ to case1
       set color red]]
   ask [sibling] of parent [set red? false
     set color black]
-
-  ; ask turtles [if not red? [set color black]]
 end
 
-to case2
+to case2     ; the case in which a node and its parent were red, but not its aunt
   let A self
   let B parent
   let C [parent] of parent
+
+; trinode restructuring of A, B, C
 
 
   let p 0
@@ -192,7 +193,7 @@ to case2
     set lc? false
     if C = [lChild] of p [ set lc? true ]
   ]
-
+;;;; Find min of A, B, C
   let miniv [value] of A
   let mini A
   if [value] of C < miniv [
@@ -201,6 +202,7 @@ to case2
   ]
   if [value] of B < miniv [set mini B]
 
+;;;; Find max of A, B, C
   let maxiv [value] of C
   let maxi C
   if [value] of A > maxiv [
@@ -209,6 +211,7 @@ to case2
   ]
   if [value] of B > maxiv [set maxi B]
 
+;;;; Find mid of A, B, C
   let midv [value] of B
   let mid B
   ifelse A != maxi and A != mini
@@ -217,7 +220,7 @@ to case2
     if C != maxi and C != mini
     [set mid C]
   ]
-
+; note: alpha < mini < beta < mid < gamma < maxi < delta
   let alpha [lChild] of mini
 
   let beta [lChild] of mid
@@ -234,7 +237,7 @@ to case2
     set parent mini
     set sibling beta
   ]
-
+; restructures nodes to correct order
   ask mini[
     set parent mid
     set lChild alpha
@@ -296,27 +299,27 @@ to case2
   ]
 end
 
-to redrawRedBlack
+to redrawRedBlack   ; redraw the red-black tree
   clear-links
 
-  ask root[
+  ask root[         ; place root
     setxy 0 15
     set depth 0
   ]
-  let myList []
+  let myList []     ; lists for nodes
   set mylist lput [lChild] of root mylist
   set mylist lput [rChild] of root mylist
   let cur root
 
-  while [empty? mylist = false][
+  while [empty? mylist = false][   ; while the list contains nodes
 
     set cur first mylist
     set mylist remove-item 0 mylist
 
 
     ask cur[
-      set depth [depth] of parent + 1
-      move-to parent
+      set depth [depth] of parent + 1  ; increasing depth for each level
+      move-to parent                   ; children move to parent and then moving diagonally away to placement
       ifelse self = [lChild] of parent
       [ set heading 180 + (45 / (depth ^ 0.5)) ]
       [ set heading 180 - (45 / (depth ^ 0.5)) ]
