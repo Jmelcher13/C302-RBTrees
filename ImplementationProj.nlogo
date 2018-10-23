@@ -333,11 +333,11 @@ to redrawRedBlack
 
 end
 
-to left-rotate [x]
-  let p [parent] of x
-  let xl [lChild] of x
-  let xr [rChild] of x
-  let s [sibling] of x
+to left-rotate
+  let p [parent] of self
+  let xl [lChild] of self
+  let xr [rChild] of self
+  let s [sibling] of self
 
   let rooted? [is-root?] of p
   let g 0
@@ -349,16 +349,16 @@ to left-rotate [x]
 
     ask g[
       ifelse p = [lChild] of g
-      [set lChild x]
-      [set rChild x]
+      [set lChild self]
+      [set rChild self]
     ]
 
     ask ps[
-      set sibling x
+      set sibling self
     ]
   ]
 
-  ask x[
+  ask self[
     set parent g
     set lChild p
     set sibling ps
@@ -370,7 +370,7 @@ to left-rotate [x]
   ]
 
   ask p[
-    set parent x
+    set parent self
     set is-root? false
     set sibling xr
     set rChild xl
@@ -389,15 +389,15 @@ to left-rotate [x]
     set parent p
   ]
 
-  redrawRedBlack
+
 end
 
 
-to right-rotate [x]
-  let p [parent] of x
-  let xl [lChild] of x
-  let xr [rChild] of x
-  let s [sibling] of x
+to right-rotate
+  let p [parent] of self
+  let xl [lChild] of self
+  let xr [rChild] of self
+  let s [sibling] of self
 
   let rooted? [is-root?] of p
   let g 0
@@ -409,16 +409,16 @@ to right-rotate [x]
 
     ask g[
       ifelse p = [lChild] of g
-      [set lChild x]
-      [set rChild x]
+      [set lChild self]
+      [set rChild self]
     ]
 
     ask ps[
-      set sibling x
+      set sibling self
     ]
   ]
 
-  ask x[
+  ask self[
     set parent g
     set rChild p
     set sibling ps
@@ -430,7 +430,7 @@ to right-rotate [x]
   ]
 
   ask p[
-    set parent x
+    set parent self
     set is-root? false
     set sibling xl
     set lChild xr
@@ -449,7 +449,7 @@ to right-rotate [x]
     set parent p
   ]
 
-  redrawRedBlack
+
 end
 ;;;;; END ZALES SECTION ;;;;;;;;;;;;;;;
 
@@ -533,12 +533,21 @@ to display-search [current-node]
 end
 
 to rb-transplant [u v]
-  ifelse [is-null?] of [parent] of u[
-    set root v]
-  [ifelse [lChild] of [parent] of u = u[
-    set [lChild] of [parent] of u v
-  ][
-    set [parent] of v [parent] of u
+  ifelse [is-null?] of [parent] of u
+  [
+    set root v
+  ]
+  [
+    ifelse [lChild] of [parent] of u = u
+    [
+      ask [parent] of u[
+        set lChild v
+      ]
+    ][
+
+    ask v[
+      set parent [parent] of u
+    ]
   ]]
 end
 
@@ -547,22 +556,33 @@ to delete
   let origColor yellow
   let z search delete-value ;make y the node that is put in the input to be deleted
   let y z
+
   ifelse [red?] of y [set origColor red]
   [set origColor black]
-  ifelse [is-null?] of [lChild] of z[
+
+  ifelse [is-null?] of [lChild] of z
+  [
     set x [rChild] of z
-    rb-transplant z x][
+    rb-transplant z x
+  ]
+  [
     ifelse [is-null?] of [rChild] of z
-    [set x [lChild] of z
+    [
+      set x [lChild] of z
       rb-transplant z x
-    ][let z.right [rChild] of z
+    ]
+    [
+      let z.right [rChild] of z
       set y tree-min z.right
       set origColor [color] of y
       set x [rChild] of y
-      ifelse [parent] of y = z[
+
+      ifelse [parent] of y = z
+      [
         ask x[
           set parent y]
-      ][
+      ]
+      [
         let y.right [rChild] of y
         rb-transplant y y.right
         ask y[
@@ -575,9 +595,11 @@ to delete
         set lChild [lChild] of z
         ask lChild[
           set parent y
-      ]
+        ]
         set color [color] of z
-  ]]]
+      ]
+    ]
+  ]
     if origColor = black [
       delete-fixup x
     ]
@@ -590,94 +612,92 @@ to-report tree-min [x]
 end
 
 to delete-fixup [x]
-  ask x[while [not is-root? and not red?]
-    [ifelse [lChild] of parent = self ;if x is the left child of it's parent
-      [let w [rChild] of parent
-        ifelse [red?] of w [
-          ask w [
-            set red? false
-            set color black]
-          ask parent[
-            set red? true
-            set color red]
-         ; left-rotate parent
-          set w [rChild] of parent] ;this is through line 8 of pseudocode on line 326
-        [ifelse[red?] of [lChild] of w = false and [red?] of [rChild] of w = false[
-          ask w[
-            set color red
-            set red? true
-          ]
-          set x [parent] of x
-          ]
-          [if [red?] of [rChild] of w = false[
-            ask w [
-              set color red
-              set red? true]
-            ask [lChild] of w [
-              set color black
-              set red? false]
-          ;  right-rotate w
-            set w [rChild] of parent
-            ask w [set color [color] of parent]
-            ask parent [
-              set color black
-              set red? false]
-            ask w [
-              ask rChild
-              [set color black ]
-            ]
-          ;   left-rotate [parent] of w
-           set x root
-          ]]
-      ]]
-  
+  ask x[while [not is-root? and not red?]
+    [ifelse [lChild] of parent = self ;if x is the left child of it's parent
+      [let w [rChild] of parent
+        ifelse [red?] of w [
+          ask w [
+            set red? false
+            set color black]
+          ask parent[
+            set red? true
+            set color red]
+            ask x[left-rotate]
+            ;left-rotate x
+          set w [rChild] of parent] ;this is through line 8 of pseudocode on line 326
+        [ifelse[red?] of [lChild] of w = false and [red?] of [rChild] of w = false[
+          ask w[
+            set color red
+            set red? true
+          ]
+          set x [parent] of x
+          ]
+          [if [red?] of [rChild] of w = false[
+            ask w [
+              set color red
+              set red? true]
+            ask [lChild] of w [
+              set color black
+              set red? false]
+              ask [lChild] of w[right-rotate]
+              ;right-rotate [lChild] of w
+            set w [rChild] of parent
+            ask w [set color [color] of parent]
+            ask parent [
+              set color black
+              set red? false]
+            ask w [
+              ask rChild
+              [set color black ]
+            ]
+            ask x[left-rotate]
+            ;left-rotate x
+           set x root
+          ]]
+      ]]
+
 [let w [lChild] of parent
-        ifelse [red?] of w [
-          ask w [
-            set red? false
-            set color black]
-          ask parent[
-            set red? true
-            set color red]
-         ; right-rotate parent
-          set w [lChild] of parent] ;this is through line 8 of pseudocode on line 326
-        [ifelse[red?] of [rChild] of w = false and [red?] of [rChild] of w = false[
-          ask w[
-            set color red
-            set red? true
-          ]
-          set x [parent] of x
-          ]
-          [if [red?] of [lChild] of w = false[
-            ask w [
-              set color red
-              set red? true]
-            ask [rChild] of w [
-              set color black
-              set red? false]
-         ;  left-rotate w
-            set w [lChild] of parent
-            ask w [set color [color] of parent]
-            ask parent [
-              set color black
-              set red? false]
-            ask w [
-              ask lChild
-              [set color black ]
-            ]
-          ;   right-rotate [parent] of w
-           set x root
-      ]]]
-    ]
-  ]
-  ]
+        ifelse [red?] of w [
+          ask w [
+            set red? false
+            set color black]
+          ask parent[
+            set red? true
+            set color red]
+         ; right-rotate parent
+          set w [lChild] of parent] ;this is through line 8 of pseudocode on line 326
+        [ifelse[red?] of [rChild] of w = false and [red?] of [rChild] of w = false[
+          ask w[
+            set color red
+            set red? true
+          ]
+          set x [parent] of x
+          ]
+          [if [red?] of [lChild] of w = false[
+            ask w [
+              set color red
+              set red? true]
+            ask [rChild] of w [
+              set color black
+              set red? false]
+         ;  left-rotate w
+            set w [lChild] of parent
+            ask w [set color [color] of parent]
+            ask parent [
+              set color black
+              set red? false]
+            ask w [
+              ask lChild
+              [set color black ]
+            ]
+          ;   right-rotate [parent] of w
+           set x root
+      ]]]
+    ]
+  ]
+  ]
+  redrawRedBlack
 end
-
-to left-rotate [x]
-
-
-end
-
 
 ;;;;;;;; END TRICIA SECTION ;;;;;;;;;;;;;
 @#$#@#$#@
@@ -731,7 +751,7 @@ INPUTBOX
 89
 130
 element
-0.0
+8.0
 1
 0
 Number
@@ -793,7 +813,7 @@ INPUTBOX
 94
 202
 search-value
-0.0
+1.0
 1
 0
 Number
@@ -821,7 +841,7 @@ INPUTBOX
 94
 276
 delete-value
-4.0
+7.0
 1
 0
 Number
