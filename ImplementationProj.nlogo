@@ -332,6 +332,125 @@ to redrawRedBlack
   ]
 
 end
+
+to left-rotate [x]
+  let p [parent] of x
+  let xl [lChild] of x
+  let xr [rChild] of x
+  let s [sibling] of x
+
+  let rooted? [is-root?] of p
+  let g 0
+  let ps 0
+  if rooted? = false
+  [
+    set g [parent] of p
+    set ps [sibling] of p
+
+    ask g[
+      ifelse p = [lChild] of g
+      [set lChild x]
+      [set rChild x]
+    ]
+
+    ask ps[
+      set sibling x
+    ]
+  ]
+
+  ask x[
+    set parent g
+    set lChild p
+    set sibling ps
+
+    if rooted? = true[
+      set is-root? true
+      set root self
+    ]
+  ]
+
+  ask p[
+    set parent x
+    set is-root? false
+    set sibling xr
+    set rChild xl
+  ]
+
+  ask xr[
+    set sibling p
+  ]
+
+  ask s[
+    set sibling xl
+  ]
+
+  ask xl[
+    set sibling s
+    set parent p
+  ]
+
+  redrawRedBlack
+end
+
+
+to right-rotate [x]
+  let p [parent] of x
+  let xl [lChild] of x
+  let xr [rChild] of x
+  let s [sibling] of x
+
+  let rooted? [is-root?] of p
+  let g 0
+  let ps 0
+  if rooted? = false
+  [
+    set g [parent] of p
+    set ps [sibling] of p
+
+    ask g[
+      ifelse p = [lChild] of g
+      [set lChild x]
+      [set rChild x]
+    ]
+
+    ask ps[
+      set sibling x
+    ]
+  ]
+
+  ask x[
+    set parent g
+    set rChild p
+    set sibling ps
+
+    if rooted? = true[
+      set is-root? true
+      set root self
+    ]
+  ]
+
+  ask p[
+    set parent x
+    set is-root? false
+    set sibling xl
+    set lChild xr
+  ]
+
+  ask xl[
+    set sibling p
+  ]
+
+  ask s[
+    set sibling xr
+  ]
+
+  ask xr[
+    set sibling s
+    set parent p
+  ]
+
+  redrawRedBlack
+end
 ;;;;; END ZALES SECTION ;;;;;;;;;;;;;;;
 
 
@@ -413,58 +532,58 @@ to display-search [current-node]
   ]][write "This value is not in the tree"]
 end
 
-to rb-transplant [u v]
-  if [is-null?] of [parent] of u[
-    root = v
-  ]
-end
+;to rb-transplant [u v]
+;  if [is-null?] of [parent] of u[
+;    root = v
+;  ]
+;end
 
-to delete
-  let x search delete-value ;make x the node that is in the delete value spot
-  write x
-  if [is-null?] of x = false[ ;make sure that the value is in the tree
-    ask x[while [not is-root? and not red?]
-      [
-        ifelse [lChild] of parent = self ;if x is the left child of it's parent
-        [let w [rChild] of parent
-          if [red?] of w [
-          ask w [
-            set red? false
-            set color black]
-          ask parent[
-            set red? true
-            set color red]
-          left-rotate parent
-            set w [rChild] of parent] ;this is through line 8 of pseudocode on line 326
-          if [red?] of [lChild] of w = false and [red?] of [rChild] of w = false[
-            ask w[
-              set color red
-              set red? true
-            ]
-            set x [parent] of x
-          ]
-          if [red?] of [rChild] of w = false[
-            ask w [
-              set color red
-              set red? true]
-            ask [lChild] of w [
-              set color black
-              set red? false]
-            right-rotate w
-            set w [rChild] of parent
-          ]
-        ][write "ho"] ;if x is the right child of it's parent
-;    while [[[is-root?] of x = false and [red?] of x = false][
-;      ifelse [][]
-;  ]]
-  ]]]
-end
-
-to left-rotate [x]
-
-
-end
-
+;to delete
+;  let x search delete-value ;make x the node that is in the delete value spot
+;  write x
+;  if [is-null?] of x = false[ ;make sure that the value is in the tree
+;    ask x[while [not is-root? and not red?]
+;      [
+;        ifelse [lChild] of parent = self ;if x is the left child of it's parent
+;        [let w [rChild] of parent
+;          if [red?] of w [
+;          ask w [
+;            set red? false
+;            set color black]
+;          ask parent[
+;            set red? true
+;            set color red]
+;          left-rotate parent
+;            set w [rChild] of parent] ;this is through line 8 of pseudocode on line 326
+;          if [red?] of [lChild] of w = false and [red?] of [rChild] of w = false[
+;            ask w[
+;              set color red
+;              set red? true
+;            ]
+;            set x [parent] of x
+;          ]
+;          if [red?] of [rChild] of w = false[
+;            ask w [
+;              set color red
+;              set red? true]
+;            ask [lChild] of w [
+;              set color black
+;              set red? false]
+;            right-rotate w
+;            set w [rChild] of parent
+;          ]
+;        ][write "ho"] ;if x is the right child of it's parent
+;;    while [[[is-root?] of x = false and [red?] of x = false][
+;;      ifelse [][]
+;;  ]]
+;  ]]]
+;end
+;
+;to left-rotate [x]
+;
+;
+;end
+;
 
 ;;;;;;;; END TRICIA SECTION ;;;;;;;;;;;;;
 @#$#@#$#@
@@ -518,7 +637,7 @@ INPUTBOX
 89
 130
 element
-13.0
+0.0
 1
 0
 Number
@@ -580,7 +699,7 @@ INPUTBOX
 94
 202
 search-value
-10.0
+0.0
 1
 0
 Number
@@ -608,7 +727,7 @@ INPUTBOX
 94
 276
 delete-value
-15.0
+4.0
 1
 0
 Number
