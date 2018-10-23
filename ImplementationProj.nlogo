@@ -1,8 +1,10 @@
 ;Tricia Nelsen, Zale Young, and Jenny Melcher
 ;Implementation Project
 ;Visualization of Red-Black Tree and 2-3-4 Tree
+
+;To run this
 breed [nodes node]
-breed [boxes box]
+
 
 globals[
 rb?
@@ -22,9 +24,6 @@ nodes-own[
   is-root?
   sibling
   depth
-]
-
-boxes-own[
 ]
 
 to setup
@@ -84,10 +83,10 @@ to insert
     [ set thisnode [rChild] of thisnode]
   ]
 
-      ask thisnode [
-      set height height + 1
-      if r? = false[set bDepth bDepth + 1]
-    ]
+  ask thisnode [
+    set height height + 1
+    if r? = false[set bDepth bDepth + 1]
+  ]
 
   let l 0
   let r 0
@@ -98,6 +97,8 @@ to insert
     set value element
     set label value
     set is-null? false
+;    ask nodes[if is-null? = false[
+;      set label-color lime]]
     set red? r?
     set bDepth 1
 
@@ -161,14 +162,14 @@ end
 
 to case1
   ask parent [set red? false
-  set color black]
+    set color black]
   if [is-root?] of [parent] of parent = false[
-  ask [parent] of parent [set red? true
+    ask [parent] of parent [set red? true
       set color red]]
   ask [sibling] of parent [set red? false
-  set color black]
+    set color black]
 
- ; ask turtles [if not red? [set color black]]
+  ; ask turtles [if not red? [set color black]]
 end
 
 to case2
@@ -390,10 +391,79 @@ end
 
 ;;;;;;START TRICIAS SECTION ;;;;;;;;;;;;;;;
 
+to-report search [val]
+  let current-node root
+  while [not [is-null?] of current-node and [value] of current-node != val]
+  [ifelse val < [value] of current-node[
+    set current-node [lChild] of current-node][
+    set current-node [rChild] of current-node]
+  ]
+    report current-node
+end
+
+to display-search [current-node]
+  reset-timer
+  ifelse [value] of current-node = search-value[
+    ask current-node[
+      set color yellow
+      write "The search value is in the tree!"]
+    while [timer < 3][]
+    ask current-node[
+      ifelse red? [set color red][set color black]
+  ]][write "This value is not in the tree"]
+end
+
+to rb-transplant [u v]
+  if [is-null?] of [parent] of u[
+    root = v
+  ]
+end
+
+to delete
+  let x search delete-value ;make x the node that is in the delete value spot
+  write x
+  if [is-null?] of x = false[ ;make sure that the value is in the tree
+    ask x[while [not is-root? and not red?]
+      [
+        ifelse [lChild] of parent = self ;if x is the left child of it's parent
+        [let w [rChild] of parent
+          if [red?] of w [
+          ask w [
+            set red? false
+            set color black]
+          ask parent[
+            set red? true
+            set color red]
+          left-rotate parent
+            set w [rChild] of parent] ;this is through line 8 of pseudocode on line 326
+          if [red?] of [lChild] of w = false and [red?] of [rChild] of w = false[
+            ask w[
+              set color red
+              set red? true
+            ]
+            set x [parent] of x
+          ]
+          if [red?] of [rChild] of w = false[
+            ask w [
+              set color red
+              set red? true]
+            ask [lChild] of w [
+              set color black
+              set red? false]
+            right-rotate w
+            set w [rChild] of parent
+          ]
+        ][write "ho"] ;if x is the right child of it's parent
+;    while [[[is-root?] of x = false and [red?] of x = false][
+;      ifelse [][]
+;  ]]
+  ]]]
+end
+
+to left-rotate [x]
 
 
-
-
+end
 
 
 ;;;;;;;; END TRICIA SECTION ;;;;;;;;;;;;;
@@ -471,10 +541,10 @@ NIL
 1
 
 BUTTON
-111
-153
-198
-186
+115
+298
+176
+331
 234 Tree
 two34Tree
 NIL
@@ -488,12 +558,68 @@ NIL
 1
 
 BUTTON
-58
-209
-182
-242
+3
+297
+99
+330
 Red-Black Tree
 RBTree
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+INPUTBOX
+14
+142
+94
+202
+search-value
+10.0
+1
+0
+Number
+
+BUTTON
+104
+156
+182
+189
+search
+display-search search search-value
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+INPUTBOX
+11
+216
+94
+276
+delete-value
+15.0
+1
+0
+Number
+
+BUTTON
+106
+233
+175
+266
+NIL
+delete
 NIL
 1
 T
